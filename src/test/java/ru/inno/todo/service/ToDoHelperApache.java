@@ -2,6 +2,7 @@ package ru.inno.todo.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.MediaType;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
@@ -27,6 +28,7 @@ public class ToDoHelperApache implements ToDoHelper {
     }
 
     public Task createNewTask() throws IOException {
+        System.out.println("Создаем новую задачу");
         HttpPost createItemReq = new HttpPost(URL);
         String myContent = "{\"title\" : \"test\"}";
         StringEntity entity = new StringEntity(myContent, ContentType.APPLICATION_JSON);
@@ -36,7 +38,9 @@ public class ToDoHelperApache implements ToDoHelper {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        return mapper.readValue(body, Task.class);
+        Task task = mapper.readValue(body, Task.class);
+        System.out.println("Новая задача: " + task);
+        return task;
     }
 
     public List<Task> getTasks() throws IOException {
@@ -51,6 +55,7 @@ public class ToDoHelperApache implements ToDoHelper {
     }
 
     public void deleteTask(Task t) throws IOException {
+        System.out.println("Удаляем задачу с id " + t.id());
         HttpDelete delete = new HttpDelete(URL + "/" + t.id());
         client.execute(delete);
     }

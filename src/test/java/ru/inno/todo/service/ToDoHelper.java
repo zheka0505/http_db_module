@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 public interface ToDoHelper {
-
      Task createNewTask() throws IOException ;
 
      List<Task> getTasks() throws IOException;
