@@ -212,7 +212,7 @@ public class BusinessTests {
     @Test
     @Tag("Негативный")
     @DisplayName("Поставить метку выполнена для выполненной задачи")
-    public void setCompleteToСompletedTask() throws IOException {
+    public void setCompleteToCompletedTask() throws IOException {
         Task myTask = service.createNewTask(RUSSIANNAME);
 
         service.setCompleted(myTask);
@@ -238,12 +238,13 @@ public class BusinessTests {
     @Tag("Негативный")
     @DisplayName("Удаление несуществующей задачи")
     public void deleteNotExistedTask() throws IOException {
-        Task myTask = new Task(-1,"несуществующая",true);
+        Task myTask = new Task(-1, "несуществующая", true);
         service.deleteTask(myTask);
         List<Task> tasks = service.getTasks();
 
         assertFalse(tasks.contains(myTask));
     }
+
     //зависнет если в списке больше 2х задач
     @Test
     @Tag("Позитивный")
