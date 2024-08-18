@@ -2,7 +2,6 @@ package ru.inno.todo.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import okhttp3.MediaType;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
@@ -17,7 +16,7 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.util.List;
 
-public class ToDoHelperApache implements ToDoHelper {
+public class ToDoHelperApache{
 
     private static final String URL = "https://todo-app-sky.herokuapp.com";
 
@@ -27,10 +26,10 @@ public class ToDoHelperApache implements ToDoHelper {
         this.client = HttpClientBuilder.create().build();
     }
 
-    public Task createNewTask() throws IOException {
+    public Task createNewTask(String name) throws IOException {
         System.out.println("Создаем новую задачу");
         HttpPost createItemReq = new HttpPost(URL);
-        String myContent = "{\"title\" : \"test\"}";
+        String myContent = "{\"title\" : \"" + name + "\"}";
         StringEntity entity = new StringEntity(myContent, ContentType.APPLICATION_JSON);
         createItemReq.setEntity(entity);
         HttpResponse response = client.execute(createItemReq);
@@ -44,7 +43,7 @@ public class ToDoHelperApache implements ToDoHelper {
     }
 
     public List<Task> getTasks() throws IOException {
-        HttpGet getAll = new HttpGet(URL); // [ {}, {}, {} ]
+        HttpGet getAll = new HttpGet(URL);
         HttpResponse response = client.execute(getAll);
         String body = EntityUtils.toString(response.getEntity());
 
@@ -54,18 +53,59 @@ public class ToDoHelperApache implements ToDoHelper {
         });
     }
 
+    public Task getTask(int id) throws IOException {
+        HttpGet getAll = new HttpGet(URL);
+        HttpResponse response = client.execute(getAll);
+        String body = EntityUtils.toString(response.getEntity());
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        List<Task> tasks = mapper.readValue(body, new TypeReference<>() {
+        });
+
+        for (Task task : tasks) {
+            if (task.id() == id) {
+                return task;
+            }
+        }
+        return null;
+    }
+
     public void deleteTask(Task t) throws IOException {
         System.out.println("Удаляем задачу с id " + t.id());
         HttpDelete delete = new HttpDelete(URL + "/" + t.id());
         client.execute(delete);
+        System.out.println("Удалили задачу " + t.id());
     }
 
-    @Override
     public void setCompleted(Task task) throws IOException {
         HttpPatch update = new HttpPatch(URL + "/" + task.id());
         StringEntity entity = new StringEntity("{\"completed\":true}", ContentType.APPLICATION_JSON);
         update.setEntity(entity);
 
         client.execute(update);
+    }
+
+    public void renameTask(Task task, String name) throws IOException {
+        HttpPatch update = new HttpPatch(URL + "/" + task.id());
+        StringEntity entity = new StringEntity("{\"title\" : \"" + name + "\"}", ContentType.APPLICATION_JSON);
+        update.setEntity(entity);
+
+        client.execute(update);
+    }
+
+    public void deleteAllTasks() throws IOException {
+
+        HttpGet getAll = new HttpGet(URL);
+        HttpResponse response = client.execute(getAll);
+        String body = EntityUtils.toString(response.getEntity());
+
+        ObjectMapper mapper = new ObjectMapper();
+        List<Task> tasks = mapper.readValue(body, new TypeReference<>() {
+        });
+        for (Task task : tasks) {
+            deleteTask(task);
+            }
+
     }
 }
